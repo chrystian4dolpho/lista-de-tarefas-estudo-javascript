@@ -1,11 +1,43 @@
-'use strict'
-//buscar tarefas
-
-//adicionar tarefa
+;'use strict';
 const addItemInput = document.getElementById('item-input');
 const form = document.getElementById('todo-add');
 const list = document.getElementById('todo-list')
 
+//buscar tarefas
+let db = []; // dados alocados no Storage
+
+if(!localStorage.getItem('tasks')){
+    localStorage.setItem('tasks', JSON.stringify(db));
+}
+
+db = JSON.parse(localStorage.getItem('tasks'));
+
+db.forEach( task => {
+
+    function isDone(){
+        if(task.status === 'done'){
+            return
+        }
+        return 'displayNone';
+    };
+
+    let taskShape = `
+    <li class="todo-item" name=${task.name} estado=${task.status}>
+    <button class="button-check">
+        <i class="fas fa-check ${isDone()}"></i>
+    </button>
+    <p class="task-name">${task.name}</p>
+    <i class="fas fa-edit"></i>
+    <i class="fas fa-trash-alt"></i>
+    </li>
+    `;
+
+    list.innerHTML += taskShape;
+
+})
+
+
+//adicionar tarefa
 function addItem(event){
 
     let itemTitle = addItemInput.value;
@@ -49,7 +81,12 @@ function addItem(event){
             item.setAttribute('name', itemTitle);
             item.setAttribute('status', 'todo');
 
-            localStorage.setItem(item.getAttribute('name'), item.getAttribute('status'));
+            db.push({
+                'name': itemTitle,
+                'status': 'todo'
+            })
+
+            localStorage.setItem('tasks', JSON.stringify(db));
             list.appendChild(item);
 
         }
@@ -60,8 +97,8 @@ function addItem(event){
 
 form.addEventListener('submit', addItem);
 
-//manipulando estados de tarefa
 
+//manipulando estados de tarefa
 list.addEventListener('click', (event) => { 
 
     if(event.target.classList.contains('button-check')){
@@ -69,7 +106,15 @@ list.addEventListener('click', (event) => {
         specificCheckBox.classList.toggle('displayNone');
         
         event.target.parentNode.setAttribute('status', 'done');
-        localStorage.setItem(event.target.parentNode.getAttribute('name'), 'done');
+
+        db.forEach(function(task){
+            if(task.name === event.target.parentNode.getAttribute('name')){
+                task.status = 'done';
+            }
+        })
+
+        localStorage.setItem('tasks', JSON.stringify(db));
+
         event.stopPropagation();
     }
 
@@ -81,7 +126,6 @@ list.addEventListener('click', (event) => {
 
 
 //editar tarefa
-
 function openItemEdition(event){
 
     const editInput = document.createElement('div');
@@ -125,9 +169,13 @@ function openItemEdition(event){
                 
                 let oldInput = item.querySelector('.task-name');
 
-                localStorage.setItem(input, oldInput.parentNode.getAttribute('status'));
-                localStorage.removeItem(oldInput.parentNode.getAttribute('name'));
+                db.forEach((task)=>{
+                    if(oldInput.parentNode.getAttribute('name') === task.name){
+                        task.name = input;
+                    }
+                })
 
+                localStorage.setItem('tasks', JSON.stringify(db));
                 oldInput.textContent = input;
 
                 editor.style.display = 'none';
@@ -146,10 +194,14 @@ function openItemEdition(event){
 
 
 //excluir tarefa
-
 function excludeItem(event){
 
-    localStorage.removeItem();
+    db = db.filter((task)=>{
+        if(event.target.parentNode.getAttribute('name') !== task.name){return task}
+    })
+
+    localStorage.setItem('tasks', JSON.stringify(db));
+    
     list.removeChild(event.target.parentNode);
 
 }
