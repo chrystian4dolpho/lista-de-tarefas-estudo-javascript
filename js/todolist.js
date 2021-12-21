@@ -14,30 +14,61 @@ db = JSON.parse(localStorage.getItem('tasks'));
 
 db.forEach( task => {
 
-    function isDone(){
-        if(task.status === 'done'){
-            return
-        }
-        return 'displayNone';
-    };
-
-    let taskShape = `
-    <li class="todo-item" name=${task.name} estado=${task.status}>
-    <button class="button-check">
-        <i class="fas fa-check ${isDone()}"></i>
-    </button>
-    <p class="task-name">${task.name}</p>
-    <i class="fas fa-edit"></i>
-    <i class="fas fa-trash-alt"></i>
-    </li>
-    `;
-
-    list.innerHTML += taskShape;
+    list.appendChild(renderItem(task));
 
 })
 
 
 //adicionar tarefa
+function renderItem(li){
+    
+    const item = document.createElement('li');
+    item.classList.add('todo-item');
+
+    const taskCheck = document.createElement('button');
+    taskCheck.classList.add('button-check');
+    
+    const checked = document.createElement('i');
+    if(li.status === 'done'){
+
+        checked.classList.add('fas', 'fa-check');
+
+    } else {
+
+        checked.classList.add('fas', 'fa-check', 'displayNone');
+    }
+    
+    taskCheck.appendChild(checked);
+    
+    const taskName = document.createElement('p');
+    taskName.classList.add('task-name');
+    taskName.textContent = li.name;
+    
+    const editBtn = document.createElement('i');
+    editBtn.classList.add('fas', 'fa-edit');
+    
+    const excludeBtn = document.createElement('i');
+    excludeBtn.classList.add('fas', 'fa-trash-alt');
+    
+    const itemChildren = {
+        taskCheck: taskCheck,
+        taskName: taskName,
+        editBtn: editBtn,
+        excludeBtn: excludeBtn
+    };
+
+    for(let element in itemChildren){
+        item.appendChild(itemChildren[element]);
+    }
+
+    item.setAttribute('name', li.name);
+    item.setAttribute('status', li.status);
+
+    return item;
+
+}
+
+
 function addItem(event){
 
     let itemTitle = addItemInput.value;
@@ -45,41 +76,8 @@ function addItem(event){
     if(!itemTitle){
         alert('Preencha o campo Novo Item');
     } else {
-        
-            const item = document.createElement('li');
-            item.classList.add('todo-item');
 
-            const taskCheck = document.createElement('button');
-            taskCheck.classList.add('button-check');
-            
-            const checked = document.createElement('i');
-            checked.classList.add('fas', 'fa-check', 'displayNone');
-            
-            taskCheck.appendChild(checked);
-            
-            const taskName = document.createElement('p');
-            taskName.classList.add('task-name');
-            taskName.textContent = itemTitle;
-            
-            const editBtn = document.createElement('i');
-            editBtn.classList.add('fas', 'fa-edit');
-            
-            const excludeBtn = document.createElement('i');
-            excludeBtn.classList.add('fas', 'fa-trash-alt');
-            
-            const itemChildren = {
-                taskCheck: taskCheck,
-                taskName: taskName,
-                editBtn: editBtn,
-                excludeBtn: excludeBtn
-            };
-
-            for(let element in itemChildren){
-                item.appendChild(itemChildren[element]);
-            }
-
-            item.setAttribute('name', itemTitle);
-            item.setAttribute('status', 'todo');
+            let item = renderItem({name: itemTitle, status: 'todo'});
 
             db.push({
                 'name': itemTitle,
