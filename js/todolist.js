@@ -124,6 +124,11 @@ list.addEventListener('click', (event) => {
 
 
 //editar tarefa
+function renderEditor(){
+
+
+}
+
 function openItemEdition(event){
 
     const editInput = document.createElement('div');
@@ -176,14 +181,14 @@ function openItemEdition(event){
                 localStorage.setItem('tasks', JSON.stringify(db));
                 oldInput.textContent = input;
 
-                editor.style.display = 'none';
+                editor.parentNode.removeChild(editor);
                 editor.removeEventListener('click', actions);
             }
             
         }
 
         if(event.target.classList.contains('cancelButton')){
-            editor.style.display = 'none';
+            editor.parentNode.removeChild(editor);
             editor.removeEventListener('click', actions);
         }
     })
